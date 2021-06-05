@@ -49,6 +49,10 @@ class AppLockerService : Service() {
 
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        Timber.d("SErvice destroyed")
+    }
 
     inner class Hbinder : Binder() {
         fun hGetService(): AppLockerService = this@AppLockerService
