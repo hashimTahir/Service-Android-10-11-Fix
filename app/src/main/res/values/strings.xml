@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">OverlayServiceApp</string>
+    <string name="accessibility_service_description">
+        Best Battery Saver Feature \n
+        Allowing More security feature
+    </string>
+    <string name="teststring">Hello</string>
+</resources>

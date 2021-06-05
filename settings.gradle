@@ -1,0 +1,2 @@
+rootProject.name = "OverlayServiceApp"
+include ':app'
