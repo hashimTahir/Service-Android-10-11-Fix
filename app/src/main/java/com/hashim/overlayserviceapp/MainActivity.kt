@@ -23,6 +23,7 @@ class MainActivity : AppCompatActivity() {
         hActivityMainBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(hActivityMainBinding.root)
         hSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        UsageAccessPermissionDialog.newInstance().show(supportFragmentManager, "")
 
         startForegroundService(Intent(this, AppLockerService::class.java))
         hGetAppsList()

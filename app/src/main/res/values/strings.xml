@@ -5,4 +5,5 @@
         Allowing More security feature
     </string>
     <string name="teststring">Hello</string>
+    <string name="permission_is_needed">Permission</string>
 </resources>

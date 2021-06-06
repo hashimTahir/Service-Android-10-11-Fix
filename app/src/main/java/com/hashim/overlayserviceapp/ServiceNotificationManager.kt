@@ -42,8 +42,8 @@ class ServiceNotificationManager (val context: Context) {
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID_APPLOCKER_SERVICE)
             .setSmallIcon(R.drawable.ic_launcher_background)
-            .setContentTitle(context.getString(R.string.teststring))
-            .setContentText(context.getString(R.string.teststring))
+            .setContentTitle(context.getString(R.string.permission_is_needed))
+            .setContentText(context.getString(R.string.permission_is_needed))
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(resultPendingIntent)
             .build()
