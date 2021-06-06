@@ -1,11 +1,15 @@
 package com.hashim.overlayserviceapp
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 
 
-class AppsAdapter : RecyclerView.Adapter<AppLockItemViewHolder>() {
+class AppsAdapter(
+    val hContext: Context,
+    val hClickCallBack: (appdata: AppData) -> Unit,
+) : RecyclerView.Adapter<AppLockItemViewHolder>() {
 
     var hList = mutableListOf<AppData>()
 
@@ -17,7 +21,7 @@ class AppsAdapter : RecyclerView.Adapter<AppLockItemViewHolder>() {
     override fun getItemCount(): Int = hList.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AppLockItemViewHolder {
-        return AppLockItemViewHolder.create(parent)
+        return AppLockItemViewHolder.create(parent, hClickCallBack, hContext)
     }
 
 

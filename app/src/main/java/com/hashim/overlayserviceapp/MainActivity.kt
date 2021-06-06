@@ -1,9 +1,11 @@
 package com.hashim.overlayserviceapp
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.ResolveInfo
 import android.os.Build
 import android.os.Bundle
+import android.preference.PreferenceManager
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.hashim.overlayserviceapp.databinding.ActivityMainBinding
@@ -13,12 +15,14 @@ import java.util.*
 class MainActivity : AppCompatActivity() {
     lateinit var hActivityMainBinding: ActivityMainBinding
     var hList = mutableListOf<AppData>()
+    lateinit var hSharedPreferences: SharedPreferences
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         hActivityMainBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(hActivityMainBinding.root)
+        hSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
 
         startForegroundService(Intent(this, AppLockerService::class.java))
         hGetAppsList()
@@ -27,7 +31,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun hInitAdapter() {
-        val hAppAdapter = AppsAdapter().also {
+        val hAppAdapter = AppsAdapter(this) {
+            val string = hSharedPreferences.edit().putString("AppName", it.appName).commit()
+            Timber.d("String $string")
+        }.also {
             it.setAppDataList(hList)
         }
         hActivityMainBinding.hAppRv.adapter = hAppAdapter
