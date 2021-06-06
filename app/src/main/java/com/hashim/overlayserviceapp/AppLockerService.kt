@@ -6,14 +6,17 @@ import android.app.usage.UsageEvents
 import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
+import android.preference.PreferenceManager
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationManagerCompat
 import kotlinx.coroutines.*
 import timber.log.Timber
+import java.util.*
 
 class AppLockerService : Service() {
 
@@ -23,6 +26,7 @@ class AppLockerService : Service() {
 
     private val hJob = SupervisorJob()
     private val hScope = CoroutineScope(Dispatchers.IO + hJob)
+    lateinit var hSharedPreferences: SharedPreferences
 
     companion object {
         private const val NOTIFICATION_ID_APPLOCKER_SERVICE = 1
@@ -49,6 +53,7 @@ class AppLockerService : Service() {
     override fun onCreate() {
         super.onCreate()
         val notification = hServiceNotificationManager.createNotification()
+        hSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
 
         NotificationManagerCompat.from(applicationContext)
             .notify(NOTIFICATION_ID_APPLOCKER_SERVICE, notification)
@@ -72,7 +77,6 @@ class AppLockerService : Service() {
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP_MR1)
     private fun observeForegroundApplication() {
-        Timber.d("Observefor")
 
         var usageEvent: UsageEvents.Event? = null
 
@@ -88,7 +92,26 @@ class AppLockerService : Service() {
             }
         }
         usageEvent?.let {
-            Timber.d("Class name ${it.className} and packagename ${it.packageName}")
+            onAppForeground(it)
+        }
+    }
+
+    private fun onAppForeground(it: UsageEvents.Event) {
+        val string = hSharedPreferences.getString("AppName", null)
+
+
+        string?.let { cam ->
+            Timber.d("Cam ${cam.lowercase(Locale.getDefault())}")
+            Timber.d("Pac ${it.packageName}")
+            if (it.packageName.contains(cam.lowercase())) {
+                val intent = Intent(this, TestActivity::class.java)
+                intent.putExtra("forservice", true)
+                intent.flags =
+                    Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+
+                startActivity(intent)
+                Timber.i("Start Activity here")
+            }
         }
     }
 
