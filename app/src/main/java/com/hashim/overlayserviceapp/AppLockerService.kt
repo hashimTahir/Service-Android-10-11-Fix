@@ -24,8 +24,12 @@ class AppLockerService : Service() {
 
     val hServiceNotificationManager = ServiceNotificationManager(this)
 
+    /*For running infinitely*/
     private val hJob = SupervisorJob()
     private val hScope = CoroutineScope(Dispatchers.IO + hJob)
+
+    /*Holder for what is locked or not
+    * Should be db in case of real app*/
     lateinit var hSharedPreferences: SharedPreferences
 
     companion object {
@@ -40,11 +44,9 @@ class AppLockerService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val notification = hServiceNotificationManager.createNotification()
-
         NotificationManagerCompat.from(applicationContext)
             .notify(NOTIFICATION_ID_APPLOCKER_SERVICE, notification)
         startForeground(NOTIFICATION_ID_APPLOCKER_SERVICE, notification)
-
         return START_NOT_STICKY
     }
 
@@ -58,29 +60,32 @@ class AppLockerService : Service() {
         NotificationManagerCompat.from(applicationContext)
             .notify(NOTIFICATION_ID_APPLOCKER_SERVICE, notification)
         startForeground(NOTIFICATION_ID_APPLOCKER_SERVICE, notification)
+
+        /*Not needed here, jst for testing*/
         if (checkUsageAccessPermission(this)) {
             showPermissionNeedNotification()
         }
+
+        /*Repeat this process every 100millis*/
         try {
             hScope.launch {
                 while (NonCancellable.isActive) {
-                    observeForegroundApplication()
+                    hCheckCurrentlyRunningApps()
                     delay(100L)
                 }
             }
             Timber.d("Service Started")
         } catch (e: Exception) {
         }
-
-
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP_MR1)
-    private fun observeForegroundApplication() {
+    private fun hCheckCurrentlyRunningApps() {
 
         var usageEvent: UsageEvents.Event? = null
 
-        val mUsageStatsManager = getSystemService(USAGE_STATS_SERVICE) as UsageStatsManager
+        val mUsageStatsManager = getSystemService(USAGE_STATS_SERVICE)
+                as UsageStatsManager
         val time = System.currentTimeMillis()
 
         val usageEvents = mUsageStatsManager.queryEvents(time - 1000 * 3600, time)
@@ -92,11 +97,13 @@ class AppLockerService : Service() {
             }
         }
         usageEvent?.let {
-            onAppForeground(it)
+            hCheckIfAppIsLockedOrNot(it)
         }
     }
 
-    private fun onAppForeground(it: UsageEvents.Event) {
+    /*If is one of the locked apps then dont let it open, present the unlocker
+    * page, in this case represented by testActivity*/
+    private fun hCheckIfAppIsLockedOrNot(it: UsageEvents.Event) {
         val string = hSharedPreferences.getString("AppName", null)
 
 
@@ -107,8 +114,10 @@ class AppLockerService : Service() {
                 val intent = Intent(this, TestActivity::class.java)
                 intent.putExtra("forservice", true)
                 intent.flags =
-                    Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
-
+                    Intent.FLAG_ACTIVITY_NEW_TASK or
+                            Intent.FLAG_ACTIVITY_CLEAR_TASK or
+                            Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                            Intent.FLAG_ACTIVITY_CLEAR_TOP
                 startActivity(intent)
                 Timber.i("Start Activity here")
             }

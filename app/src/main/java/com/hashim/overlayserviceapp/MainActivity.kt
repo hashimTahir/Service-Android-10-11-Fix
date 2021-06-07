@@ -14,7 +14,7 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
     lateinit var hActivityMainBinding: ActivityMainBinding
-    var hList = mutableListOf<AppData>()
+    var hAppList = mutableListOf<AppData>()
     lateinit var hSharedPreferences: SharedPreferences
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -22,6 +22,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         hActivityMainBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(hActivityMainBinding.root)
+
         hSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         UsageAccessPermissionDialog.newInstance().show(supportFragmentManager, "")
 
@@ -36,7 +37,7 @@ class MainActivity : AppCompatActivity() {
             val string = hSharedPreferences.edit().putString("AppName", it.appName).commit()
             Timber.d("String $string")
         }.also {
-            it.setAppDataList(hList)
+            it.setAppDataList(hAppList)
         }
         hActivityMainBinding.hAppRv.adapter = hAppAdapter
     }
@@ -71,7 +72,6 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-        hList = appDataList
-        Timber.d("Applist size ${appDataList.size}")
+        hAppList = appDataList
     }
 }
